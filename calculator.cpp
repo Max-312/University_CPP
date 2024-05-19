@@ -1,11 +1,6 @@
 #include "calculator.h"
 
-#include "Header.h"
-#include <string>
-#include <stack>
-#include <cctype>
-#include <cmath>
-#include<iostream>
+
 using namespace std;
 bool isOperator(char c) {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';

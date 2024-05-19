@@ -3,13 +3,9 @@
 
 #include <string>
 #include <stack>
-#include <sstream>
-#include<cmath>
-#include <stdexcept>
-#include <unordered_map>
-#include <vector>
 #include <cctype>
-
+#include <cmath>
+#include<iostream>
 
 bool isOperator(char ch);
 bool isUnary(char c, size_t pos, const std::string& expr);
