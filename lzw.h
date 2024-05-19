@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 #include <unordered_map>
 
 std::vector<int> compress(const std::string& text);
