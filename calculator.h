@@ -4,6 +4,7 @@
 #include <string>
 #include <stack>
 #include <sstream>
+#include<cmath>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
