@@ -1,28 +1,22 @@
-#include "volume.h"
+#include<iostream>
+#include<fstream>
+#include<vector>
+using namespace std;
 
-
-int getMaxVolume(int a, int b, int c, int n, int* arr) {
+int getMaxVolume(int a, int b, int c, const vector<int>& heights) {
     int maxVolume = 0;
 
-    int left = 0;
-    int right = n - 1;
-
-    while (left < right) {
-        int height = std::min(arr[left], arr[right]);
-
-        int width = right - left;
-
-        int volume = b * width * height;
-
-        if (volume > maxVolume) {
-            maxVolume = volume;
-        }
-
-        if (arr[left] < arr[right]) {
-            left++;
-        }
-        else {
-            right--;
+    for (int startColumn = 0; startColumn < heights.size(); ++startColumn) {
+        for (int endColumn = startColumn + 1; endColumn < heights.size(); ++endColumn) {
+            if (endColumn - startColumn <= a && min(heights[startColumn], heights[endColumn]) <= c)
+            {
+                int length = endColumn - startColumn;
+                int height = min(heights[startColumn], heights[endColumn]);
+                int volume = b * length * height;
+                if (volume > maxVolume) {
+                    maxVolume = volume;
+                }
+            }
         }
     }
 
