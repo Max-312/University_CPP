@@ -10,12 +10,12 @@
 #include <vector>
 #include <cctype>
 
-bool isBalanced(const std::string& expr);
-int getPrecedence(char op);
+
 bool isOperator(char ch);
-bool isUnaryMinus(const std::string& expr, size_t pos);
-std::string toRPN(const std::string& expr);
-double evaluateRPN(const std::string& rpn);
+bool isUnary(char c, size_t pos, const std::string& expr);
+int precedence(char op);
+double applyOperation(double a, double b, char op);
+bool isValidExpression(const std::string& expr);
 double calculate(const std::string& expr);
 
 #endif

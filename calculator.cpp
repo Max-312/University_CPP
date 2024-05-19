@@ -1,23 +1,31 @@
 #include "calculator.h"
 
-
-bool isBalanced(const std::string& expr) {
-    std::stack<char> stack;
-    for (char ch : expr) {
-        if (ch == '(') {
-            stack.push(ch);
-        }
-        else if (ch == ')') {
-            if (stack.empty() || stack.top() != '(') {
-                return false;
-            }
-            stack.pop();
-        }
-    }
-    return stack.empty();
+#include "Header.h"
+#include <string>
+#include <stack>
+#include <cctype>
+#include <cmath>
+#include<iostream>
+using namespace std;
+bool isOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
 }
 
-int getPrecedence(char op) {
+bool isUnary(char c, size_t pos, const std::string& expr) {
+    if (c == '-' && (pos == 0 || isOperator(expr[pos - 1]) || expr[pos - 1] == '('))
+        return true;
+    if (c == '-' && pos > 0 && std::isspace(expr[pos - 1])) {
+        size_t prev = pos - 1;
+        while (prev > 0 && std::isspace(expr[prev - 1])) {
+            --prev;
+        }
+        if (prev == 0 || expr[prev - 1] == '(' || isOperator(expr[prev - 1]))
+            return true;
+    }
+    return false;
+}
+
+int precedence(char op) {
     switch (op) {
     case '+':
     case '-':
@@ -32,101 +40,133 @@ int getPrecedence(char op) {
     }
 }
 
-bool isOperator(char ch) {
-    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+double applyOperation(double a, double b, char op) {
+    switch (op) {
+    case '+':
+        return a + b;
+    case '-':
+        return a - b;
+    case '*':
+        return a * b;
+    case '/':
+        return a / b;
+    case '^':
+        return std::pow(a, b);
+    default:
+        return 0;
+    }
 }
 
-bool isUnaryMinus(const std::string& expr, size_t pos) {
-    if (expr[pos] != '-') return false;
-    return pos == 0 || (!std::isdigit(expr[pos - 1]) && expr[pos - 1] != ')');
-}
-
-std::string toRPN(const std::string& expr) {
+double calculate(const std::string& expr) {
+    std::stack<double> values;
     std::stack<char> operators;
-    std::stringstream output;
-    size_t length = expr.length();
 
-    for (size_t i = 0; i < length; ++i) {
-        if (std::isspace(expr[i])) {
+    bool lastWasOperator = true;
+
+    for (size_t i = 0; i < expr.length(); ++i) {
+        if (expr[i] == ' ') {
             continue;
         }
-        if (std::isdigit(expr[i]) || expr[i] == '.') {
-            while (i < length && (std::isdigit(expr[i]) || expr[i] == '.')) {
-                output << expr[i++];
+        else if (std::isdigit(expr[i]) || (expr[i] == '-' && lastWasOperator)) {
+            if (expr[i] == '-') {
+                if (expr[i] == '-') {
+                    size_t j = i + 1;
+                    while (j < expr.length() && (std::isdigit(expr[j]) || expr[j] == '.')) {
+                        ++j;
+                    }
+                    values.push(-1 * std::stod(expr.substr(i + 1, j - i - 1)));
+                    i = j - 1;
+                    lastWasOperator = false;
+                }
+
             }
-            output << ' ';
-            --i;
+            else {
+                double num = std::stod(expr.substr(i));
+                while (i < expr.length() && (std::isdigit(expr[i]) || expr[i] == '.')) {
+                    ++i;
+                }
+                --i;
+                values.push(num);
+                lastWasOperator = false;
+            }
         }
         else if (expr[i] == '(') {
             operators.push(expr[i]);
+            lastWasOperator = true;
         }
         else if (expr[i] == ')') {
             while (!operators.empty() && operators.top() != '(') {
-                output << operators.top() << ' ';
+                double b = values.top();
+                values.pop();
+                double a = values.top();
+                values.pop();
+                char op = operators.top();
                 operators.pop();
+                values.push(applyOperation(a, b, op));
             }
-            if (!operators.empty()) {
-                operators.pop();
-            }
+            operators.pop();
+            lastWasOperator = false;
         }
         else if (isOperator(expr[i])) {
-            if (isUnaryMinus(expr, i)) {
-                output << "0 ";
-            }
-            while (!operators.empty() && getPrecedence(operators.top()) >= getPrecedence(expr[i])) {
-                output << operators.top() << ' ';
+            while (!operators.empty() && precedence(operators.top()) >= precedence(expr[i])) {
+                double b = values.top();
+                values.pop();
+                double a = values.top();
+                values.pop();
+                char op = operators.top();
                 operators.pop();
+                values.push(applyOperation(a, b, op));
             }
             operators.push(expr[i]);
+            lastWasOperator = true;
         }
     }
 
     while (!operators.empty()) {
-        output << operators.top() << ' ';
+        double b = values.top();
+        values.pop();
+        double a = values.top();
+        values.pop();
+        char op = operators.top();
         operators.pop();
+        values.push(applyOperation(a, b, op));
     }
 
-    return output.str();
+    return values.top();
 }
 
-double evaluateRPN(const std::string& rpn) {
-    std::stack<double> stack;
-    std::istringstream tokens(rpn);
-    std::string token;
+bool isValidExpression(const std::string& expr) {
+    int balance = 0;
+    bool lastWasOperator = true;
 
-    while (tokens >> token) {
-        if (std::isdigit(token[0]) || (token[0] == '-' && token.size() > 1)) {
-            stack.push(std::stod(token));
+    for (size_t i = 0; i < expr.length(); ++i) {
+        char c = expr[i];
+
+        if (c == '(') {
+            ++balance;
+            lastWasOperator = true;
+        }
+        else if (c == ')') {
+            --balance;
+            lastWasOperator = false;
+        }
+        else if (isOperator(c)) {
+            if (lastWasOperator && c != '-')
+                return false;
+            lastWasOperator = true;
+        }
+        else if (std::isdigit(c) || c == '.' || c == ' ') {
+            lastWasOperator = false;
         }
         else {
-            double operand2 = stack.top(); stack.pop();
-            double operand1 = stack.top(); stack.pop();
-            if (token == "+") {
-                stack.push(operand1 + operand2);
-            }
-            else if (token == "-") {
-                stack.push(operand1 - operand2);
-            }
-            else if (token == "*") {
-                stack.push(operand1 * operand2);
-            }
-            else if (token == "/") {
-                stack.push(operand1 / operand2);
-            }
-            else if (token == "^") {
-                stack.push(std::pow(operand1, operand2));
-            }
+
+            if (c == '-' && (i == 0 || expr[i - 1] == '('))
+                continue;
+            if (c == '-' && i > 0 && std::isspace(expr[i - 1]))
+                continue;
+            return false;
         }
     }
 
-    return stack.top();
-}
-
-double calculate(const std::string& expr) {
-    if (!isBalanced(expr)) {
-        throw std::runtime_error("Unbalanced parentheses");
-    }
-
-    std::string rpn = toRPN(expr);
-    return evaluateRPN(rpn);
+    return balance == 0 && !lastWasOperator;
 }
