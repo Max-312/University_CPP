@@ -7,6 +7,15 @@
 #include <cmath>
 #include<iostream>
 
+enum Priority {
+    OPEN_BRACKET = 0,
+    CLOSED_BRACKET = 0,
+    PLUS_OR_MINUS = 1,
+    MULT_OR_DIV = 2,
+    DEGREE = 3,
+    UNARY_MINUS = 4
+};
+
 bool isOperator(char symbol);
 void getPostfixNotation(const std::string& expression, std::stack<std::string>* postfixNotation);
 int getPriorityOperators(char symbol);
