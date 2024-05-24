@@ -1,10 +1,8 @@
 #ifndef VOLUME_H
 #define VOLUME_H
 
-#include<iostream>
-#include<fstream>
-#include<vector>
+#include <algorithm>
 
-int getMaxVolume(int a, int b, int c, const vector<int>& heights);
+int getMaxVolume(int a, int b, int c, int n, int* t);
 
 #endif
