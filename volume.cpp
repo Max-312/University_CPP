@@ -1,24 +1,18 @@
-#include<iostream>
-#include<fstream>
-#include<vector>
+
 using namespace std;
 
-int getMaxVolume(int a, int b, int c, const vector<int>& heights) {
-    int maxVolume = 0;
+int getMaxVolume(int a, int b, int c, const std::vector<int>& heights) {
+    int n = heights.size();
+    int max_volume = 0;
 
-    for (int startColumn = 0; startColumn < heights.size(); ++startColumn) {
-        for (int endColumn = startColumn + 1; endColumn < heights.size(); ++endColumn) {
-            if (endColumn - startColumn <= a && min(heights[startColumn], heights[endColumn]) <= c)
-            {
-                int length = endColumn - startColumn;
-                int height = min(heights[startColumn], heights[endColumn]);
-                int volume = b * length * height;
-                if (volume > maxVolume) {
-                    maxVolume = volume;
-                }
-            }
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            int height = std::min(heights[i], heights[j]);
+            int length = j - i;
+            int volume = b * length * height;
+            max_volume = std::max(max_volume, volume);
         }
     }
 
-    return maxVolume;
+    return max_volume;
 }
