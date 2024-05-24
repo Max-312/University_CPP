@@ -28,7 +28,6 @@ std::vector<int> compress(const std::string& text) {
 
     return compressed;
 }
-
 std::string decompress(const std::vector<int>& compressed) {
     std::unordered_map<int, std::string> dictionary;
     for (int i = 0; i < 256; ++i) {
